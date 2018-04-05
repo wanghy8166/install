@@ -3,6 +3,7 @@
 # v0.1 支持 CentOS7.2 + mysql5.6
 # v0.2 支持 CentOS6.9 + mysql5.6
 # v0.3 完善支持 CentOS6|CentOS7 + mysql5.6
+# v0.4 完善支持 CentOS6|CentOS7 + mysql5.6
 
 cat <<Download
 mkdir -p /soft
@@ -13,6 +14,17 @@ bash install_mysql.sh
 Download
 
 clear
+    count=`ps -ef |grep mysqld |grep -v "grep" |wc -l`
+    echo -e "\n\e[1;33m mysqld进程个数:$count \e[0m"
+
+    if [ $count -eq 0 ]; then 
+        echo -e "\n\e[1;33m 不存在mysqld进程，继续安装！ \e[0m"
+    else
+        echo -e "\n\e[1;33m 已存在mysqld进程，终止安装！ \e[0m"
+        exit
+    fi
+
+# clear
 soft_path="/soft" # mysql制品的存放路径
 data_path="/home/data" # mysql的安装路径
 mysql_version="mysql-5.6.39-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
