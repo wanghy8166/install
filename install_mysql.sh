@@ -4,6 +4,14 @@
 # v0.2 支持 CentOS6.9 + mysql5.6
 # v0.3 完善支持 CentOS6|CentOS7 + mysql5.6
 
+cat <<Download
+mkdir -p /soft
+cd /soft
+wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-linux-glibc2.12-x86_64.tar.gz
+wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
+bash install_mysql.sh
+Download
+
 clear
 soft_path="/soft" # mysql制品的存放路径
 data_path="/home/data" # mysql的安装路径
