@@ -6,6 +6,7 @@
 # v0.4 完善支持 CentOS6|CentOS7 + mysql5.6
 
 cat <<Download
+# 安装步骤
 mkdir -p /soft
 cd /soft
 wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-linux-glibc2.12-x86_64.tar.gz
