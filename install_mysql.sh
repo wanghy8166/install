@@ -4,14 +4,20 @@
 # v0.2 支持 CentOS6.9 + mysql5.6
 # v0.3 完善支持 CentOS6|CentOS7 + mysql5.6
 # v0.4 完善支持 CentOS6|CentOS7 + mysql5.6
+# v0.5 完善支持 CentOS6|CentOS7 + mysql5.6|mysql5.7
 
 cat <<Download
 # 安装步骤
 mkdir -p /soft
 cd /soft
-wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-linux-glibc2.12-x86_64.tar.gz
+# wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-linux-glibc2.12-x86_64.tar.gz
+wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
 wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
 bash install_mysql.sh
+
+异机mysqldump备份，需要的程序:
+https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-winx64.zip
+https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-winx64.zip
 Download
 
 clear
@@ -28,9 +34,13 @@ clear
 # clear
 soft_path="/soft" # mysql制品的存放路径
 data_path="/home/data" # mysql的安装路径
-mysql_version="mysql-5.6.39-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
+mysql_version="mysql-5.7.21-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
 # nmon_version="nmon_x86_64_centos7"
 mysql_password="heading"
+
+mem=`awk '($1 == "MemTotal:"){print $2/1048576*0.7}' /proc/meminfo`
+mem7=${mem%.*}
+echo -e "\n\e[1;33m 物理内存的70%约为:${mem7}G，请替换 my.cnf 配置参数（innodb-log-file-size，innodb-buffer-pool-size）! \e[0m"
 
 echo -e "\n\e[1;33m 提前装好操作系统、配置好外网、准备好安装文件，一键安装脚本在虚拟机环境（1CPU,2G内存），整体耗时大约10分钟。 \e[0m"
 echo -e "\n\e[1;33m mysql安装文件,请放在 ${soft_path} 下! \e[0m"
@@ -281,6 +291,7 @@ rpm -q centos-release-7 > /dev/null 2>&1
 if [ $? -eq 0 ];then
     firewall-cmd --zone=public --add-port=3306/tcp --permanent > /dev/null 2>&1
     firewall-cmd --reload > /dev/null 2>&1
+    # firewall-cmd --state 
     echo -e "\n\e[1;31m 检查:开放端口 ... 操作完成! \e[0m"
 fi
 }
@@ -373,7 +384,7 @@ fi
 
 
 # 解压安装文件
-ls ${data_path}/${mysql_version}/lib/libmysqlclient_r.so.18.1.0 > /dev/null 2>&1
+ls ${data_path}/${mysql_version}/bin/mysqld > /dev/null 2>&1
 if [ $? -eq 0 ];then echo -e "\n\e[1;36m 解压安装文件:${mysql_version} ... 已存在! \e[0m"
     else
 echo -e "\n\e[1;36m 解压安装文件:${mysql_version} ... 开始解压! \e[0m"
@@ -405,6 +416,7 @@ default-character-set          = utf8
 
 [mysqld]
 # GENERAL #
+lc-messages-dir                = ${data_path}/mysql/share
 character-set-server           = utf8
 lower_case_table_names         = 1
 user                           = mysql
@@ -422,12 +434,14 @@ max-connect-errors             = 1000000
 skip-name-resolve
 sql-mode                       = STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_AUTO_VALUE_ON_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE
 sysdate-is-now                 = 1
+explicit_defaults_for_timestamp=true
 innodb                         = FORCE
 
 # DATA STORAGE #
 datadir                        = ${data_path}/mysql/data/
 
 # BINARY LOGGING #
+server-id                      = 1
 log-bin                        = ${data_path}/mysql/data/mysql-bin
 expire-logs-days               = 2
 sync-binlog                    = 1
@@ -451,7 +465,7 @@ innodb-log-file-size           = 128M
 innodb-flush-log-at-trx-commit = 1
 innodb-file-per-table          = 1
 # innodb-buffer-pool-size 改为物理内存的70%
-innodb-buffer-pool-size        = 1G
+innodb-buffer-pool-size        = ${mem7}G
 
 # LOGGING #
 log-error                      = ${data_path}/mysql/data/mysql-error.log
@@ -461,8 +475,25 @@ slow-query-log-file            = ${data_path}/mysql/data/mysql-slow.log
 long_query_time                = 1
 EOF
 
-echo -e "\n    scripts/mysql_install_db --user=mysql 开始执行............................................................" >> $log 2>&1
-scripts/mysql_install_db --user=mysql >> $log 2>&1
+echo ${mysql_version}|grep 5.6
+if [ $? -eq 0 ];then
+    echo -e "\n    初始化5.6数据库:"${mysql_version} >> $log 2>&1
+    echo -e "\n    scripts/mysql_install_db --user=mysql 开始执行............................................................" >> $log 2>&1
+    scripts/mysql_install_db --user=mysql >> $log 2>&1
+fi
+
+echo ${mysql_version}|grep 5.7
+if [ $? -eq 0 ];then
+    echo -e "\n    初始化5.7数据库:"${mysql_version} >> $log 2>&1
+    mkdir mysql-files
+    chown mysql:mysql mysql-files
+    chmod 750 mysql-files
+    echo -e "\n    bin/mysqld --defaults-file=./my.cnf --initialize-insecure --user=mysql 开始执行............................................................" >> $log 2>&1
+    bin/mysqld --defaults-file=./my.cnf --initialize-insecure --user=mysql >> $log 2>&1
+    echo -e "\n    bin/mysql_ssl_rsa_setup --defaults-file=./my.cnf 开始执行............................................................" >> $log 2>&1
+    bin/mysql_ssl_rsa_setup --defaults-file=./my.cnf >> $log 2>&1
+    chmod 0644 data/*.pem
+fi
 
 echo -e "\n    bin/mysqld_safe --user=mysql & 开始执行............................................................" >> $log 2>&1
 bin/mysqld_safe --user=mysql & >> $log 2>&1
@@ -491,10 +522,12 @@ echo "sleep 30,等待mysql第一次启动:初始化logfile,配置差的机器需
 sleep 30
 
 echo -e "\n    bin/mysqladmin设置密码 开始执行............................................................" >> $log 2>&1
-bin/mysqladmin -u root -h 127.0.0.1 password ${mysql_password} >> $log 2>&1
+# bin/mysqladmin -u root -h 127.0.0.1 password ${mysql_password} >> $log 2>&1
+bin/mysqladmin -S ${data_path}/mysql/data/mysql.sock -h localhost -u root password ${mysql_password} >> $log 2>&1
 
 echo -e "\n    bin/mysql修改用户权限 开始执行............................................................" >> $log 2>&1
-bin/mysql -h127.0.0.1 -uroot -p${mysql_password} -e "delete from mysql.user where Password = '';update mysql.user set Host='%' where user='root' and Host<>'%';commit;FLUSH PRIVILEGES;"
+bin/mysql -S ${data_path}/mysql/data/mysql.sock -h localhost -uroot -p${mysql_password} -e "delete from mysql.user where Password = '';  commit;  FLUSH PRIVILEGES;"
+bin/mysql -S ${data_path}/mysql/data/mysql.sock -h localhost -uroot -p${mysql_password} -e "update mysql.user set Host='%' where user='root' and Host<>'%';  commit;  FLUSH PRIVILEGES;"
 
 echo -e "\n\e[1;31m 检查:安装、配置mysql ... 已完成! \e[0m"
 fi
