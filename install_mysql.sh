@@ -436,6 +436,7 @@ sql-mode                       = STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,
 sysdate-is-now                 = 1
 explicit_defaults_for_timestamp=true
 innodb                         = FORCE
+symbolic-links                 = 0
 
 # DATA STORAGE #
 datadir                        = ${data_path}/mysql/data/
@@ -473,6 +474,7 @@ log-error                      = ${data_path}/mysql/data/mysql-error.log
 slow-query-log                 = 1
 slow-query-log-file            = ${data_path}/mysql/data/mysql-slow.log
 long_query_time                = 1
+
 EOF
 
 echo ${mysql_version}|grep 5.6
@@ -488,6 +490,8 @@ if [ $? -eq 0 ];then
     mkdir mysql-files
     chown mysql:mysql mysql-files
     chmod 750 mysql-files
+    echo 'log_timestamps                 = SYSTEM' >> my.cnf
+    
     echo -e "\n    bin/mysqld --defaults-file=./my.cnf --initialize-insecure --user=mysql 开始执行............................................................" >> $log 2>&1
     bin/mysqld --defaults-file=./my.cnf --initialize-insecure --user=mysql >> $log 2>&1
     echo -e "\n    bin/mysql_ssl_rsa_setup --defaults-file=./my.cnf 开始执行............................................................" >> $log 2>&1
