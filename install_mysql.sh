@@ -526,11 +526,14 @@ echo "sleep 30,等待mysql第一次启动:初始化logfile,配置差的机器需
 sleep 30
 
 echo -e "\n    bin/mysqladmin设置密码 开始执行............................................................" >> $log 2>&1
-# bin/mysqladmin -u root -h 127.0.0.1 password ${mysql_password} >> $log 2>&1
 bin/mysqladmin -S ${data_path}/mysql/data/mysql.sock -h localhost -u root password ${mysql_password} >> $log 2>&1
 
 echo -e "\n    bin/mysql修改用户权限 开始执行............................................................" >> $log 2>&1
+echo ${mysql_version}|grep 5.6
+if [ $? -eq 0 ];then
 bin/mysql -S ${data_path}/mysql/data/mysql.sock -h localhost -uroot -p${mysql_password} -e "delete from mysql.user where Password = '';  commit;  FLUSH PRIVILEGES;"
+fi
+
 bin/mysql -S ${data_path}/mysql/data/mysql.sock -h localhost -uroot -p${mysql_password} -e "update mysql.user set Host='%' where user='root' and Host<>'%';  commit;  FLUSH PRIVILEGES;"
 
 echo -e "\n\e[1;31m 检查:安装、配置mysql ... 已完成! \e[0m"
