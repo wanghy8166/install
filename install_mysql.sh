@@ -13,6 +13,7 @@ cd /soft
 # wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-linux-glibc2.12-x86_64.tar.gz
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
 wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
+# sed -i 's/5.7.21/5.6.39/g' install_mysql.sh 
 bash install_mysql.sh
 
 异机mysqldump备份，需要的程序:
@@ -429,7 +430,7 @@ key-buffer-size                = 32M
 myisam-recover-options         = FORCE,BACKUP
 
 # SAFETY #
-max-allowed-packet             = 16M
+max-allowed-packet             = 32M
 max-connect-errors             = 1000000
 skip-name-resolve
 sql-mode                       = STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_AUTO_VALUE_ON_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE
@@ -679,6 +680,38 @@ EOF
 
 echo -e "\n\e[1;31m 检查:配置本机mysql的insert，update，delete监控脚本 ... 已完成! \e[0m"
 
+fi
+
+
+
+# 配置mysql-log-rotate
+ls /etc/logrotate.d/mysql-log-rotate > /dev/null 2>&1
+if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查:配置mysql-log-rotate ... 已存在! \e[0m"
+    else
+
+cat >/etc/logrotate.d/mysql-log-rotate<<EOF
+${data_path}/mysql/data/mysql-slow.log {
+        nocompress
+        create 600 mysql mysql
+        dateext
+        notifempty
+        sharedscripts
+        daily
+        maxage 15
+        rotate 15
+        missingok
+    postrotate
+        if test -x ${data_path}/mysql/bin/mysqladmin && \
+            ${data_path}/mysql/bin/mysqladmin ping -h127.0.0.1 -uroot -p${mysql_password} > /dev/null 2>&1 
+        then
+            ${data_path}/mysql/bin/mysqladmin flush-logs -h127.0.0.1 -uroot -p${mysql_password} > /dev/null 2>&1 
+        fi
+    endscript
+}
+EOF
+echo "59 23 * * * root ( /usr/sbin/logrotate -f /etc/logrotate.d/mysql-log-rotate) " >> /var/spool/cron/root
+
+echo -e "\n\e[1;31m 检查:配置mysql-log-rotate ... 已完成! \e[0m"
 fi
 
 
