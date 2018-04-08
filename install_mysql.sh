@@ -719,7 +719,7 @@ ${data_path}/mysql/data/mysql-slow.log {
     endscript
 }
 EOF
-echo "59 23 * * * root ( /usr/sbin/logrotate -f /etc/logrotate.d/mysql-log-rotate) " >> /var/spool/cron/root
+echo "59 23 * * * /usr/sbin/logrotate -f /etc/logrotate.d/mysql-log-rotate" >> /var/spool/cron/root
 
 echo -e "\n\e[1;31m 检查:配置mysql-log-rotate ... 已完成! \e[0m"
 fi
