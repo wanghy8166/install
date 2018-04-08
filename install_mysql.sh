@@ -5,11 +5,13 @@
 # v0.3 完善支持 CentOS6|CentOS7 + mysql5.6
 # v0.4 完善支持 CentOS6|CentOS7 + mysql5.6
 # v0.5 完善支持 CentOS6|CentOS7 + mysql5.6|mysql5.7
+# v0.6 CentOS6|7+mysql5.6|5.7,nmon,dump,rotate,pt
 
 cat <<Download
 # 安装步骤
 mkdir -p /soft
 cd /soft
+wget https://www.percona.com/downloads/percona-toolkit/3.0.8/binary/tarball/percona-toolkit-3.0.8_x86_64.tar.gz
 # wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-linux-glibc2.12-x86_64.tar.gz
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
 wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
@@ -36,7 +38,7 @@ clear
 soft_path="/soft" # mysql制品的存放路径
 data_path="/home/data" # mysql的安装路径
 mysql_version="mysql-5.7.21-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
-# nmon_version="nmon_x86_64_centos7"
+pt_version="percona-toolkit-3.0.8" # Linux - Generic 压缩包
 mysql_password="heading"
 
 mem=`awk '($1 == "MemTotal:"){print $2/1048576*0.7}' /proc/meminfo`
@@ -46,6 +48,7 @@ echo -e "\n\e[1;33m 物理内存的70%约为:${mem7}G，请替换 my.cnf 配置�
 echo -e "\n\e[1;33m 提前装好操作系统、配置好外网、准备好安装文件，一键安装脚本在虚拟机环境（1CPU,2G内存），整体耗时大约10分钟。 \e[0m"
 echo -e "\n\e[1;33m mysql安装文件,请放在 ${soft_path} 下! \e[0m"
 echo " ${mysql_version}.tar.gz"
+echo " ${pt_version}_x86_64.tar.gz"
 # echo " ${nmon_version}"
 # 链接: https://pan.baidu.com/s/1PsR1z9kk3Gu_1j-IWtg82w 密码: qre4
 
@@ -70,6 +73,13 @@ ls ${soft_path}/${mysql_version}.tar.gz > /dev/null 2>&1
 if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查文件:${mysql_version}.tar.gz ... OK! \e[0m"
     else
         echo -e "\n\e[1;31m 检查文件:${mysql_version}.tar.gz ... 没找到! \e[0m"
+        exit
+fi
+
+ls ${soft_path}/${pt_version}_x86_64.tar.gz > /dev/null 2>&1
+if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查文件:${pt_version}_x86_64.tar.gz ... OK! \e[0m"
+    else
+        echo -e "\n\e[1;31m 检查文件:${pt_version}_x86_64.tar.gz ... 没找到! \e[0m"
         exit
 fi
 
@@ -712,6 +722,26 @@ EOF
 echo "59 23 * * * root ( /usr/sbin/logrotate -f /etc/logrotate.d/mysql-log-rotate) " >> /var/spool/cron/root
 
 echo -e "\n\e[1;31m 检查:配置mysql-log-rotate ... 已完成! \e[0m"
+fi
+
+
+
+# 配置percona-toolkit
+ls ${data_path}/pt/bin/pt-query-digest > /dev/null 2>&1
+if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查:配置percona-toolkit ... 已存在! \e[0m"
+    else
+
+yum install -y perl-Time-HiRes perl-DBD-MySQL perl-devel perl-Digest-MD5 >> $log 2>&1
+mkdir -p ${data_path}/pt >> $log 2>&1
+tar zxvf ${soft_path}/${pt_version}_x86_64.tar.gz -C ${soft_path} >> $log 2>&1
+cd ${soft_path}/${pt_version} >> $log 2>&1
+
+perl Makefile.PL PREFIX=${data_path}/pt >> $log 2>&1
+make         >> $log 2>&1
+make test    >> $log 2>&1
+make install >> $log 2>&1
+
+echo -e "\n\e[1;31m 检查:配置percona-toolkit ... 已完成! \e[0m"
 fi
 
 
