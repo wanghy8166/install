@@ -509,6 +509,10 @@ long_query_time                = 1
 EOF
 mkdir -p /etc/my.cnf.d
 
+# 这是一种尝试，!includedir /etc/my.cnf.d可以添加自定义配置信息，而不用修改原my.cnf
+# 并且可以在不同配置文件里放相同的参数，按照从上往下的顺序读取配置文件和参数，以最后读到的参数为准
+# 虽然可以这么用，但是生产环境并不建议配置多个相同的参数而值不同，这里仅仅是为了测试方便
+
 echo ${mysql_version}|grep 5.6
 if [ $? -eq 0 ];then
     echo -e "\n    初始化5.6数据库:"${mysql_version} >> $log 2>&1
