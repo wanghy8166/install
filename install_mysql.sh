@@ -315,10 +315,10 @@ if [ $? -eq 0 ];then
     # firewall-cmd --state 
 
     # centos 7 删除 virbr0 虚拟网卡
-    virsh net-destroy  default
-    virsh net-undefine default
-    systemctl disable libvirtd
-    systemctl stop    libvirtd
+    virsh net-destroy  default > /dev/null 2>&1
+    virsh net-undefine default > /dev/null 2>&1
+    systemctl disable libvirtd > /dev/null 2>&1
+    systemctl stop    libvirtd > /dev/null 2>&1
 
     echo -e "\n\e[1;31m 检查:开放端口 ... 操作完成! \e[0m"
 fi
