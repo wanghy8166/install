@@ -8,6 +8,13 @@
 # v0.6 CentOS6|7+mysql5.6|5.7,nmon,dump,rotate,pt
 
 cat <<Download
+# 不使用虚拟化的，可禁用libvirtd服务，重启主机
+virsh net-destroy  default
+virsh net-undefine default
+systemctl disable libvirtd
+systemctl stop    libvirtd
+init 6
+
 # 安装步骤
 mkdir -p /soft
 cd /soft
@@ -40,6 +47,9 @@ data_path="/home/data" # mysql的安装路径
 mysql_version="mysql-5.7.21-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
 pt_version="percona-toolkit-3.0.8" # Linux - Generic 压缩包
 mysql_password="heading"
+
+local_ip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
+echo "本机ip:"${local_ip}
 
 mem=`awk '($1 == "MemTotal:"){print $2/1048576*0.7}' /proc/meminfo`
 mem7=${mem%.*}
@@ -290,7 +300,7 @@ iptables()
 {
 grep -q "CentOS release 6" /etc/issue
 if [ $? -eq 0 ];then
-    /sbin/iptables -A INPUT -p tcp --dport 3306 -j ACCEPT > /dev/null 2>&1
+    /sbin/iptables -I INPUT -p tcp --dport 3306 -j ACCEPT > /dev/null 2>&1
     /sbin/iptables -nvL > /dev/null 2>&1
     service iptables save > /dev/null 2>&1
     #service iptables restart > /dev/null 2>&1
@@ -303,6 +313,13 @@ if [ $? -eq 0 ];then
     firewall-cmd --zone=public --add-port=3306/tcp --permanent > /dev/null 2>&1
     firewall-cmd --reload > /dev/null 2>&1
     # firewall-cmd --state 
+
+    # centos 7 删除 virbr0 虚拟网卡
+    virsh net-destroy  default
+    virsh net-undefine default
+    systemctl disable libvirtd
+    systemctl stop    libvirtd
+
     echo -e "\n\e[1;31m 检查:开放端口 ... 操作完成! \e[0m"
 fi
 }
@@ -486,7 +503,11 @@ slow-query-log                 = 1
 slow-query-log-file            = ${data_path}/mysql/data/mysql-slow.log
 long_query_time                = 1
 
+[mysqld_safe]
+!includedir                    /etc/my.cnf.d
+
 EOF
+mkdir -p /etc/my.cnf.d
 
 echo ${mysql_version}|grep 5.6
 if [ $? -eq 0 ];then
@@ -501,7 +522,9 @@ if [ $? -eq 0 ];then
     mkdir mysql-files
     chown mysql:mysql mysql-files
     chmod 750 mysql-files
-    echo 'log_timestamps                 = SYSTEM' >> my.cnf
+
+    echo '[mysqld]'                                 > /etc/my.cnf.d/my001-log.cnf
+    echo 'log_timestamps                 = SYSTEM' >> /etc/my.cnf.d/my001-log.cnf
     
     echo -e "\n    bin/mysqld --defaults-file=./my.cnf --initialize-insecure --user=mysql 开始执行............................................................" >> $log 2>&1
     bin/mysqld --defaults-file=./my.cnf --initialize-insecure --user=mysql >> $log 2>&1
