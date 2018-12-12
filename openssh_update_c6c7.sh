@@ -3,6 +3,7 @@
 # 安装要求:https://openbsd.hk/pub/OpenBSD/OpenSSH/portable/INSTALL
 # 测试环境:CentOS release 6.9 (Final) OpenSSH_5.3p1, OpenSSL 1.0.1e-fips 11 Feb 2013
 # 测试环境:CentOS Linux release 7.5.1804 (Core) OpenSSH_7.4p1, OpenSSL 1.0.2k-fips  26 Jan 2017
+# 测试环境:CentOS Linux release 7.6.1810 (Core) OpenSSH_7.4p1, OpenSSL 1.0.2k-fips  26 Jan 2017
 # 计划升级到:https://openbsd.hk/pub/OpenBSD/OpenSSH/portable/openssh-7.9p1.tar.gz
 # Zlib 1.1.4 or 1.2.1.2 or greater
 # OpenSSL >= 1.0.1 < 1.1.0
