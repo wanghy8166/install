@@ -128,6 +128,7 @@ ssh -V
 # 确认OpenSSH升级成功后，再恢复原配置
 # 关闭telnet远程登录
 # 关闭telnet远程root登录,普通用户还可以登录:mv /etc/securetty.bak /etc/securetty
+# 删除普通用户:userdel admin2018
 # chkconfig xinetd off
 # service xinetd stop
 # 开启iptables防火墙和selinux
