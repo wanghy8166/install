@@ -18,15 +18,15 @@ init 6
 # 安装步骤
 mkdir -p /soft
 cd /soft
-wget https://www.percona.com/downloads/percona-toolkit/3.0.8/binary/tarball/percona-toolkit-3.0.8_x86_64.tar.gz
-# wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-linux-glibc2.12-x86_64.tar.gz
-wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
+wget https://www.percona.com/downloads/percona-toolkit/3.0.13/binary/tarball/percona-toolkit-3.0.13_x86_64.tar.gz
+wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.43-linux-glibc2.12-x86_64.tar.gz
+# wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
 wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
-# sed -i 's/5.7.21/5.6.39/g' install_mysql.sh 
+# sed -i 's/5.7.21/5.6.43/g' install_mysql.sh 
 bash install_mysql.sh
 
 异机mysqldump备份，需要的程序:
-https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-winx64.zip
+https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.43-winx64.zip
 https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-winx64.zip
 Download
 
@@ -44,8 +44,8 @@ clear
 # clear
 soft_path="/soft" # mysql制品的存放路径
 data_path="/home/data" # mysql的安装路径
-mysql_version="mysql-5.7.21-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
-pt_version="percona-toolkit-3.0.8" # Linux - Generic 压缩包
+mysql_version="mysql-5.6.43-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
+pt_version="percona-toolkit-3.0.13" # Linux - Generic 压缩包
 mysql_password="heading"
 
 local_ip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
