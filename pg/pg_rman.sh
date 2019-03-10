@@ -2,6 +2,7 @@
 # 环境变量    
 export LANG=en_US.utf8
 export PATH=$PATH:/usr/pgsql-10/bin
+export PGDATA=/pg/data
 export BACKUP_PATH=/pg/pg_rman
 mkdir -p $BACKUP_PATH
 chown postgres:postgres -R $BACKUP_PATH
