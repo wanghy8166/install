@@ -149,6 +149,9 @@ wal_keep_segments = 256
 tcp_keepalives_idle = 60  
 tcp_keepalives_interval = 10  
 tcp_keepalives_count = 10
+shared_preload_libraries = 'pg_stat_statements'
+pg_stat_statements.max = 10000
+pg_stat_statements.track = all
 
 EOF
 #grep "^[a-z]" postgresql.conf
@@ -172,6 +175,7 @@ systemctl start  postgresql-10
 su - postgres <<EOF
 psql -c "CREATE user replication WITH REPLICATION PASSWORD '${PASSWORD}'"
 psql -c "alter user postgres with password '${PASSWORD}'"
+psql -c "CREATE EXTENSION pg_stat_statements"
 EOF
 
 ps -ef|grep -v grep|grep -E 'sender|receiver'
