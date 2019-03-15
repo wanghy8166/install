@@ -18,7 +18,8 @@ wget -O /etc/yum.repos.d/Centos-7.repo http://mirrors.aliyun.com/repo/Centos-7.r
 wget -O /etc/yum.repos.d/epel-7.repo   http://mirrors.aliyun.com/repo/epel-7.repo
 sudo yum-config-manager \
     --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
+    http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+    # https://download.docker.com/linux/centos/docker-ce.repo
     # http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 
 sudo yum clean all
