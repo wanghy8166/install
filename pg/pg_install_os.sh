@@ -143,7 +143,7 @@ else
     wget -O /etc/yum.repos.d/epel-7.repo   http://mirrors.aliyun.com/repo/epel-7.repo    >> $log 2>&1
     yum clean all  >> $log 2>&1
     yum makecache  >> $log 2>&1
-    yum install -y atop htop glances iftop vmtouch gcc xterm xclock libaio libaio-devel sysstat xhost tree iotop dstat iptraf iptraf-ng unzip rdate git svn time zlib zlib-devel >> $log 2>&1
+    yum install -y atop htop glances iftop vmtouch gcc xterm xclock libaio libaio-devel sysstat xhost tree iotop dstat iptraf iptraf-ng unzip rdate git svn time zlib zlib-devel net-tools >> $log 2>&1
     echo -e "\n\e[1;31m 检查:yum ... 基础依赖包安装操作完成!`date -R` \e[0m"
 fi
 fi
