@@ -120,6 +120,9 @@ cd /usr/local/src/openssh-7.9p1
 ./configure --prefix=/usr --sysconfdir=/etc/ssh --with-pam --with-zlib --with-md5-passwords
 make && make install
  
+# 处理/etc/ssh/ssh_config line 59: Unsupported option "gssapiauthentication"
+sed -i 's_GSSAPIAuthentication yes_#GSSAPIAuthentication yes_g' /etc/ssh/ssh_config
+
 service sshd restart
 service sshd status
 
