@@ -127,6 +127,7 @@ sed -i 's_GSSAPIAuthentication yes_#GSSAPIAuthentication yes_g' /etc/ssh/ssh_con
 mv /usr/lib/systemd/system/sshd.service /usr/lib/systemd/system/sshd.service-`date +%Y%m%d-%H%M%S`
 systemctl daemon-reload
 cd /usr/local/src/openssh-7.9p1 
+mv /etc/init.d/sshd /etc/init.d/sshd-`date +%Y%m%d-%H%M%S`
 cp contrib/redhat/sshd.init /etc/init.d/sshd
 chmod +x /etc/init.d/sshd
 chkconfig --add sshd
