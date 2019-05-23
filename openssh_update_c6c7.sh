@@ -123,7 +123,16 @@ make && make install
 # 处理/etc/ssh/ssh_config line 59: Unsupported option "gssapiauthentication"
 sed -i 's_GSSAPIAuthentication yes_#GSSAPIAuthentication yes_g' /etc/ssh/ssh_config
 
+# 解决openssh升级后不断重启
+mv /usr/lib/systemd/system/sshd.service /usr/lib/systemd/system/sshd.service-`date +%Y%m%d-%H%M%S`
+systemctl daemon-reload
+cd /usr/local/src/openssh-7.9p1 
+cp contrib/redhat/sshd.init /etc/init.d/sshd
+chmod +x /etc/init.d/sshd
+chkconfig --add sshd
+chkconfig --list |grep sshd
 service sshd restart
+
 service sshd status
 
 ssh -V
