@@ -4,6 +4,8 @@
 
 
 # OS操作系统环境配置
+# 依赖包 
+yum install -y git wget rdate unzip net-tools deltarpm vim tree
 
 
 
