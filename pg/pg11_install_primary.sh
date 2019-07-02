@@ -68,6 +68,8 @@ else
 # 安装rpm仓库源
 rpm -ivh https://download.postgresql.org/pub/repos/yum/reporpms/EL-7-x86_64/pgdg-redhat-repo-latest.noarch.rpm
 # 安装客户端
+# yum whatprovides '/usr/pgsql-11/bin/pgbench'
+# pgbench在postgresql11包中
 yum -y install postgresql11
 # 安装服务端
 yum -y install postgresql11-server
