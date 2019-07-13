@@ -158,6 +158,7 @@ archive_mode = on
 archive_command = 'cp %p $PGARCHIVE/%f'
 # 设置来自备库的并发连接的最大数目
 max_wal_senders = 10
+max_wal_size = 2GB
 # 为备库保留的wal个数
 wal_keep_segments = 256
 # 防止远程程序与PG连接中断
