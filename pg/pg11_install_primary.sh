@@ -149,6 +149,10 @@ listen_addresses = '0.0.0.0'
 max_connections = 1000
 # 1/4 主机内存
 shared_buffers = ${MEM2}MB
+# sql查询时使用的内存空间,默认4MB
+work_mem = 8MB
+# 创建索引时使用的内存空间,默认64MB
+maintenance_work_mem = 256MB
 log_filename = 'postgresql-%Y-%m-%d.log'
 # 单位:ms毫秒
 log_min_duration_statement = 5000
