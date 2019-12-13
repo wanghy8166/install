@@ -169,6 +169,8 @@ wal_keep_segments = 256
 tcp_keepalives_idle = 60  
 tcp_keepalives_interval = 10  
 tcp_keepalives_count = 10
+# 回收垃圾相关
+log_autovacuum_min_duration = 0
 
 EOF
 #grep "^[a-z]" postgresql.conf
