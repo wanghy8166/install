@@ -6,6 +6,7 @@
 # v0.4 完善支持 CentOS6|CentOS7 + mysql5.6
 # v0.5 完善支持 CentOS6|CentOS7 + mysql5.6|mysql5.7
 # v0.6 CentOS6|7+mysql5.6|5.7,nmon,dump,rotate,pt
+# v0.7 基于CentOS7.7 + pt3.1.0 + mysql-5.7.28 / mysql-5.6.46 测试 2019.12.28
 
 cat <<Download
 # 不使用虚拟化的，可禁用libvirtd服务，重启主机
@@ -19,16 +20,29 @@ init 6
 mkdir -p /soft
 cd /soft
 wget https://www.percona.com/downloads/percona-toolkit/3.0.13/binary/tarball/percona-toolkit-3.0.13_x86_64.tar.gz
-wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.43-linux-glibc2.12-x86_64.tar.gz
-# wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
+wget  https://www.percona.com/downloads/percona-toolkit/3.1.0/binary/tarball/percona-toolkit-3.1.0_x86_64.tar.gz
+
+wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.44-linux-glibc2.12-x86_64.tar.gz
+wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.46-linux-glibc2.12-x86_64.tar.gz
+
+wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
+wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.28-linux-glibc2.12-x86_64.tar.gz
+
 wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
-# sed -i 's/5.7.21/5.6.43/g' install_mysql.sh 
+sed -i 's/5.7.28/5.6.46/g' install_mysql.sh 
 bash install_mysql.sh
 
 异机mysqldump备份，需要的程序:
-https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.43-winx64.zip
+https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.44-winx64.zip
 https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-winx64.zip
 Download
+
+
+
+# 依赖包 
+yum install -y git wget rdate unzip net-tools deltarpm vim tree
+
+
 
 clear
     count=`ps -ef |grep mysqld |grep -v "grep" |wc -l`
@@ -43,9 +57,10 @@ clear
 
 # clear
 soft_path="/soft" # mysql制品的存放路径
-data_path="/home/data" # mysql的安装路径
-mysql_version="mysql-5.6.43-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
-pt_version="percona-toolkit-3.0.13" # Linux - Generic 压缩包
+data_path="/db/data" # mysql的安装路径
+backup_path="/dbbak" # mysqldump的安装路径
+mysql_version="mysql-5.7.28-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
+pt_version="percona-toolkit-3.1.0" # Linux - Generic 压缩包
 mysql_password="heading"
 
 local_ip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
@@ -348,6 +363,7 @@ oraInventory()
 mkdir -p                 ${data_path} 
 # chown -R mysql:mysql     ${data_path}
 # chmod -R 775             ${data_path}
+mkdir -p                 ${backup_path} 
 echo -e "\n\e[1;31m 检查:安装目录 ... 操作完成! \e[0m"
 }
 
@@ -490,7 +506,7 @@ table-open-cache               = 2048
 innodb-flush-method            = O_DIRECT
 innodb-log-files-in-group      = 8
 # innodb-log-file-size 根据磁盘mbps能力,改为128M~512M
-innodb-log-file-size           = 128M
+innodb-log-file-size           = 256M
 innodb-flush-log-at-trx-commit = 1
 innodb-file-per-table          = 1
 # innodb-buffer-pool-size 改为物理内存的70%
@@ -642,12 +658,12 @@ fi
 
 
 # 配置mysqldump备份
-ls ${data_path}/backup/mysqldump-backup.sh > /dev/null 2>&1
+ls ${backup_path}/backup/mysqldump-backup.sh > /dev/null 2>&1
 if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查:配置mysqldump备份 ... 已存在! \e[0m"
     else
 
-mkdir -p ${data_path}/backup/
-cat >${data_path}/backup/mysqldump-backup.sh<<EOF
+mkdir -p ${backup_path}/backup/
+cat >${backup_path}/backup/mysqldump-backup.sh<<EOF
 #!/bin/sh
 rq=\`date +%Y%m%d\`
 echo \$rq
@@ -656,7 +672,7 @@ date
 PATH=\$PATH:${data_path}/mysql/bin
 export PATH
 
-cd ${data_path}/backup/
+cd ${backup_path}/backup/
 
 time mysqldump -S${data_path}/mysql/data/mysql.sock --port=3306 -uroot -p${mysql_password} --opt --single-transaction --flush-logs --master-data=2 --routines --all-databases | gzip > \$rq-mysqldump.sql.gz 
 
@@ -673,7 +689,7 @@ else
 cat /dev/null
 fi
 EOF
-echo "01 02 * * *   sh ${data_path}/backup/mysqldump-backup.sh  >${data_path}/backup/\`date +\%Y\%m\%d\`-mysqldump.sql.gz.log 2>&1 " >> /var/spool/cron/root
+echo "01 02 * * *   sh ${backup_path}/backup/mysqldump-backup.sh  >${backup_path}/backup/\`date +\%Y\%m\%d\`-mysqldump.sql.gz.log 2>&1 " >> /var/spool/cron/root
 
 echo -e "\n\e[1;31m 检查:配置mysqldump备份 ... 已完成! \e[0m"
 
