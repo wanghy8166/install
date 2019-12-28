@@ -73,3 +73,6 @@ service mysql.server start
 SHOW GLOBAL VARIABLES like '%audit%';  
 SHOW GLOBAL VARIABLES like '%audit%'\G  
 show VARIABLES like '%audit%';  
+
+## 审计日志  
+tail -f /db/data/mysql/data/server_audit.log  
