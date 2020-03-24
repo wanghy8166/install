@@ -7,6 +7,7 @@
 # v0.5 完善支持 CentOS6|CentOS7 + mysql5.6|mysql5.7
 # v0.6 CentOS6|7+mysql5.6|5.7,nmon,dump,rotate,pt
 # v0.7 基于CentOS7.7 + pt3.1.0 + mysql-5.7.28 / mysql-5.6.46 测试 2019.12.28
+# v0.8 基于CentOS7.6 + pt3.1.0 + mysql-5.7.29 2020.3.24
 
 cat <<Download
 # 不使用虚拟化的，可禁用libvirtd服务，重启主机
@@ -27,6 +28,7 @@ wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.46-linux-glibc2.12-
 
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
 wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.28-linux-glibc2.12-x86_64.tar.gz
+wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.29-linux-glibc2.12-x86_64.tar.gz
 
 wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
 sed -i 's/5.7.28/5.6.46/g' install_mysql.sh 
@@ -35,6 +37,7 @@ bash install_mysql.sh
 异机mysqldump备份，需要的程序:
 https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.44-winx64.zip
 https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-winx64.zip
+https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.29-winx64.zip
 Download
 
 
@@ -59,7 +62,7 @@ clear
 soft_path="/soft" # mysql制品的存放路径
 data_path="/db/data" # mysql的安装路径
 backup_path="/dbbak" # mysqldump的安装路径
-mysql_version="mysql-5.7.28-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
+mysql_version="mysql-5.7.29-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
 pt_version="percona-toolkit-3.1.0" # Linux - Generic 压缩包
 mysql_password="heading"
 
@@ -287,7 +290,7 @@ cp -i /etc/sysctl.conf /etc/sysctl.conf-`date +%Y%m%d-%H%M%S`
 # echo 'kernel.shmall = 2097152'                            >> /etc/sysctl.conf
 # echo 'kernel.shmmax = 2147483648'                         >> /etc/sysctl.conf
 
-echo 'vm.swappiness = 1'                         >> /etc/sysctl.conf
+echo 'vm.swappiness = 0'                         >> /etc/sysctl.conf
 echo 'vm.dirty_background_ratio = 3'             >> /etc/sysctl.conf
 echo 'vm.dirty_ratio = 80'                       >> /etc/sysctl.conf
 echo 'vm.dirty_expire_centisecs = 500'           >> /etc/sysctl.conf
@@ -490,6 +493,7 @@ server-id                      = 1
 log-bin                        = ${data_path}/mysql/data/mysql-bin
 expire-logs-days               = 2
 sync-binlog                    = 1
+log_bin_trust_function_creators= 1
 
 # CACHES AND LIMITS #
 tmp-table-size                 = 32M
@@ -506,7 +510,7 @@ table-open-cache               = 2048
 innodb-flush-method            = O_DIRECT
 innodb-log-files-in-group      = 8
 # innodb-log-file-size 根据磁盘mbps能力,改为128M~512M
-innodb-log-file-size           = 256M
+innodb-log-file-size           = 128M
 innodb-flush-log-at-trx-commit = 1
 innodb-file-per-table          = 1
 # innodb-buffer-pool-size 改为物理内存的70%
