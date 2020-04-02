@@ -16,6 +16,10 @@ MySQL 5.7 Replication新特性
 http://mp.weixin.qq.com/s?__biz=MjM5NzAzMTY4NQ==&mid=2653928733&idx=1&sn=3988f37f77a32bd19bc7ec94889168cb&scene=0#wechat_redirect
 
 综合考虑，选择：基于GTID的半同步复制、多线程复制
+
+https://dev.mysql.com/doc/refman/5.6/en/replication-options-reference.html
+https://dev.mysql.com/doc/refman/5.6/en/binary-log.html
+
 ####################################################################################################
 soft_path="/soft" # mysql制品的存放路径
 data_path="/home/data" # mysql的安装路径
