@@ -49,6 +49,11 @@ sync_relay_log                 = 1
 sync_relay_log_info            = 1
 report_host                    = ${local_ip}
 report_port                    = 3306
+# 校验
+binlog_checksum=CRC32
+master_verify_checksum=1
+slave_sql_verify_checksum=1
+binlog_rows_query_log_events=1
 # 半同步 #
 plugin-load                    = "rpl_semi_sync_master=semisync_master.so;rpl_semi_sync_slave=semisync_slave.so"
 rpl-semi-sync-master-enabled   = 1
