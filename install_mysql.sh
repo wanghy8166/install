@@ -678,7 +678,7 @@ export PATH
 
 cd ${backup_path}/backup/
 
-time mysqldump -S${data_path}/mysql/data/mysql.sock --port=3306 -uroot -p${mysql_password} --opt --single-transaction --flush-logs --master-data=2 --routines --all-databases | gzip > \$rq-mysqldump.sql.gz 
+time mysqldump -S${data_path}/mysql/data/mysql.sock --port=3306 -uroot -p${mysql_password} --opt --single-transaction --flush-logs --master-data=2 --all-databases --triggers --routines --events | gzip > \$rq-mysqldump.sql.gz 
 
 # bash显示前几天,并删除
 rqt=\`date -d "7 days ago" +%Y%m%d\`
