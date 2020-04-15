@@ -476,7 +476,7 @@ key-buffer-size                = 32M
 myisam-recover-options         = FORCE,BACKUP
 
 # SAFETY #
-max-allowed-packet             = 32M
+max-allowed-packet             = 1024M
 max-connect-errors             = 1000000
 skip-name-resolve
 sql-mode                       = STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_AUTO_VALUE_ON_ZERO,NO_ENGINE_SUBSTITUTION,NO_ZERO_DATE,NO_ZERO_IN_DATE
