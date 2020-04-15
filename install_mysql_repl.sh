@@ -48,9 +48,10 @@ relay_log_recovery             = 1
 relay_log_purge                = 1
 read_only                      = 1
 slave_net_timeout              = 60
-sync_master_info               = 1
-sync_relay_log                 = 1
-sync_relay_log_info            = 1
+# 恢复默认值,加快从库同步速度,降低安全性,
+sync_master_info               = 10000
+sync_relay_log                 = 10000
+sync_relay_log_info            = 10000
 report_host                    = ${local_ip}
 report_port                    = 3306
 # 校验
