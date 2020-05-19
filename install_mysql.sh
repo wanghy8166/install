@@ -523,6 +523,11 @@ slow-query-log                 = 1
 slow-query-log-file            = ${data_path}/mysql/data/mysql-slow.log
 long_query_time                = 1
 
+# Default #
+# transaction-isolation = REPEATABLE-READ
+# crm #
+transaction-isolation = READ-COMMITTED
+
 [mysqld_safe]
 !includedir                    /etc/my.cnf.d
 
