@@ -154,8 +154,6 @@ work_mem = 8MB
 # 创建索引时使用的内存空间,默认64MB
 maintenance_work_mem = 256MB
 log_filename = 'postgresql-%Y-%m-%d.log'
-# 单位:ms毫秒
-log_min_duration_statement = 5000
 wal_level = replica
 wal_log_hints = on
 archive_mode = on
@@ -169,8 +167,21 @@ wal_keep_segments = 256
 tcp_keepalives_idle = 60  
 tcp_keepalives_interval = 10  
 tcp_keepalives_count = 10
+
+# https://github.com/darold/pgbadger#INSTALLATION
+# 单位:milliseconds毫秒
+log_min_duration_statement = 1000
+log_line_prefix = '%m [%p]: user=%u,db=%d,app=%a,client=%h '
+log_checkpoints = on
+log_connections = on
+log_disconnections = on
+log_lock_waits = on
+# 跟踪临时文件使用,设置跟踪阈值为0KB
+log_temp_files = 0
 # 回收垃圾相关
 log_autovacuum_min_duration = 0
+log_error_verbosity = default
+lc_messages='C'
 
 EOF
 #grep "^[a-z]" postgresql.conf
@@ -277,5 +288,4 @@ fi
 
 
 # 工具:pgcenter,pg_top,pgstatspack,pg_statsinfo,pgbadger,,,,,,
-
 
