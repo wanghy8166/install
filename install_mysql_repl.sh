@@ -46,6 +46,7 @@ relay_log_info_repository      = TABLE
 binlog_format                  = row
 relay_log_recovery             = 1
 relay_log_purge                = 1
+# read_only,主库为0,从库为1
 read_only                      = 1
 slave_net_timeout              = 60
 # sync_relay_log值为1,表示mysql将每1个sync_relay_log事件写入到relay log中继日志(形如relay-bin.000135),
