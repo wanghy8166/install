@@ -94,6 +94,8 @@ flush logs;
 stop slave;
 reset slave;
 change master to master_host='172.17.10.92',master_user='repl',master_password='repl',master_port=3306,master_auto_position=1;
+# 告诉从库哪些Gtid事务已经执行过了,从xtrabackup_binlog_info文件获取
+SET @@GLOBAL.GTID_PURGED= 'e89c5c8f-c5b9-11ea-beb8-0050569a68f7:1-4972823';
 show warnings;
 start slave;
 show slave status\G
