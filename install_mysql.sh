@@ -246,6 +246,8 @@ else
     yum install -y atop htop glances iftop vmtouch gcc tigervnc-server xterm xclock libaio libaio-devel sysstat xhost tree iotop dstat iptraf iptraf-ng  >> $log 2>&1
     yum install -y make sysstat libaio libaio-devel  >> $log 2>&1
     yum install -y libaio autoconf  >> $log 2>&1
+    # 5.7.31  
+    yum install -y numactl  >> $log 2>&1  
     # yum install -y libXi libXtst make sysstat cpp mpfr binutils compat-libcap1 compat-libstdc++-33 elfutils-libelf elfutils-libelf-devel gcc gcc-c++ glibc glibc-common glibc-devel glibc-headers libaio libaio-devel libgcc libstdc++ libstdc++-devel compat-db compat-libstdc++ gnome-libs pdksh xscreensaver openmotif libXp compat-gcc-34 compat-gcc-34-c++ expat unixODBC unixODBC-devel kernel-headers libgomp psmisc  >> $log 2>&1
     echo -e "\n\e[1;31m 检查:yum ... 依赖包安装操作完成!`date -R` \e[0m"
 fi
