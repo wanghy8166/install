@@ -22,6 +22,7 @@ mkdir -p /soft
 cd /soft
 wget https://www.percona.com/downloads/percona-toolkit/3.0.13/binary/tarball/percona-toolkit-3.0.13_x86_64.tar.gz
 wget  https://www.percona.com/downloads/percona-toolkit/3.1.0/binary/tarball/percona-toolkit-3.1.0_x86_64.tar.gz
+wget  https://www.percona.com/downloads/percona-toolkit/3.2.1/binary/tarball/percona-toolkit-3.2.1_x86_64.tar.gz
 
 wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.44-linux-glibc2.12-x86_64.tar.gz
 wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.46-linux-glibc2.12-x86_64.tar.gz
@@ -29,7 +30,7 @@ wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.46-linux-glibc2.12-
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
 wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.28-linux-glibc2.12-x86_64.tar.gz
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.29-linux-glibc2.12-x86_64.tar.gz
-wget https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
+wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
 
 wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
 sed -i 's/5.7.28/5.6.46/g' install_mysql.sh 
