@@ -86,6 +86,7 @@ SHOW SLAVE HOSTS;
 查看相关参数
 show variables like '%gtid%';
 show variables like '%server_id%';
+show variables like '%auto_increment%';
 show variables like '%relay_log%';
 show variables like '%master_info%';
 show variables like '%sync%';
