@@ -31,6 +31,7 @@ wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-
 wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.28-linux-glibc2.12-x86_64.tar.gz
 wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.29-linux-glibc2.12-x86_64.tar.gz
 wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
+wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.32-linux-glibc2.12-x86_64.tar.gz
 
 wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
 sed -i 's/5.7.28/5.6.46/g' install_mysql.sh 
@@ -45,7 +46,7 @@ Download
 
 
 # 依赖包 
-yum install -y git wget rdate unzip net-tools deltarpm vim tree
+yum install -y git wget rdate unzip net-tools deltarpm vim tree lrzsz telnet traceroute
 
 
 
@@ -64,8 +65,8 @@ clear
 soft_path="/soft" # mysql制品的存放路径
 data_path="/db/data" # mysql的安装路径
 backup_path="/dbbak" # mysqldump的安装路径
-mysql_version="mysql-5.7.29-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
-pt_version="percona-toolkit-3.1.0" # Linux - Generic 压缩包
+mysql_version="mysql-5.7.32-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
+pt_version="percona-toolkit-3.2.1" # Linux - Generic 压缩包
 mysql_password="heading"
 
 local_ip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
@@ -623,7 +624,8 @@ ls /usr/local/sbin/${nmon_version} > /dev/null 2>&1
 if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查:配置nmon监控 ... 已存在! \e[0m"
     else
 
-wget -O ${soft_path}/${nmon_version}   https://raw.githubusercontent.com/wanghy8166/nmon/master/${nmon_version} >> $log 2>&1
+# 请先手工下载
+# wget -O ${soft_path}/${nmon_version}   https://raw.githubusercontent.com/wanghy8166/nmon/master/${nmon_version} >> $log 2>&1
 
 cp -i ${soft_path}/${nmon_version} /usr/local/sbin/${nmon_version}
 chmod +x /usr/local/sbin/${nmon_version}
