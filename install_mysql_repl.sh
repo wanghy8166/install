@@ -38,8 +38,9 @@ gtid_mode                      = on
 enforce_gtid_consistency       = 1
 log_slave_updates
 # replication #
-# server-id:主库改为1;从库改为2;
-server-id                      = 1
+server-id                      = 1 # 主库改为1;从库改为2;
+auto_increment_increment       = 2 
+auto_increment_offset          = 1 # 主库改为1;从库改为2;
 relay_log                      = ${data_path}/mysql/data/relay-bin
 master_info_repository         = TABLE
 relay_log_info_repository      = TABLE
