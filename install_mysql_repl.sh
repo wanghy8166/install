@@ -38,7 +38,12 @@ gtid_mode                      = on
 enforce_gtid_consistency       = 1
 log_slave_updates
 # replication #
-replicate_wild_ignore_table    = information_schema.%,mysql.%,performance_schema.%,sys.%,monitor_db.%  
+replicate_wild_ignore_table    = information_schema.%
+replicate_wild_ignore_table    = mysql.%
+replicate_wild_ignore_table    = performance_schema.%
+replicate_wild_ignore_table    = sys.%
+replicate_wild_ignore_table    = monitor_db.%
+
 server-id                      = 1 # 主库改为1;从库改为2;
 auto_increment_increment       = 2 
 auto_increment_offset          = 1 # 主库改为1;从库改为2;
