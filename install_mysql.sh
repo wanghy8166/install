@@ -489,8 +489,8 @@ sysdate-is-now                 = 1
 explicit_defaults_for_timestamp=true
 innodb                         = FORCE
 symbolic-links                 = 0
-interactive_timeout            = 1800
-wait_timeout                   = 1800
+interactive_timeout            = 360
+wait_timeout                   = 360
 
 # DATA STORAGE #
 datadir                        = ${data_path}/mysql/data/
