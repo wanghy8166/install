@@ -7,7 +7,9 @@
 # v0.5 完善支持 CentOS6|CentOS7 + mysql5.6|mysql5.7
 # v0.6 CentOS6|7+mysql5.6|5.7,nmon,dump,rotate,pt
 # v0.7 基于CentOS7.7 + pt3.1.0 + mysql-5.7.28 / mysql-5.6.46 测试 2019.12.28
+# v0.71 增加支持mysql-8.0.23,参数待优化
 # v0.8 基于CentOS7.6 + pt3.1.0 + mysql-5.7.29 2020.3.24
+
 
 cat <<Download
 # 不使用虚拟化的，可禁用libvirtd服务，重启主机
@@ -20,35 +22,29 @@ init 6
 # 安装步骤
 mkdir -p /soft
 cd /soft
-wget https://www.percona.com/downloads/percona-toolkit/3.0.13/binary/tarball/percona-toolkit-3.0.13_x86_64.tar.gz
-wget  https://www.percona.com/downloads/percona-toolkit/3.1.0/binary/tarball/percona-toolkit-3.1.0_x86_64.tar.gz
-wget  https://www.percona.com/downloads/percona-toolkit/3.2.1/binary/tarball/percona-toolkit-3.2.1_x86_64.tar.gz
+wget  https://downloads.percona.com/downloads/percona-toolkit/3.3.0/binary/tarball/percona-toolkit-3.3.0_x86_64.tar.gz
 
-wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.44-linux-glibc2.12-x86_64.tar.gz
 wget https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.46-linux-glibc2.12-x86_64.tar.gz
 
-wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-linux-glibc2.12-x86_64.tar.gz
-wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.28-linux-glibc2.12-x86_64.tar.gz
-wget https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.29-linux-glibc2.12-x86_64.tar.gz
-wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.31-linux-glibc2.12-x86_64.tar.gz
 wget     https://cdn.mysql.com/Downloads/MySQL-5.7/mysql-5.7.32-linux-glibc2.12-x86_64.tar.gz
 
+wget     https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.23-linux-glibc2.12-x86_64.tar.xz
+
 wget https://raw.githubusercontent.com/wanghy8166/install/master/install_mysql.sh
-sed -i 's/5.7.28/5.6.46/g' install_mysql.sh 
+# sed -i 's/5.7.21/5.6.39/g' install_mysql.sh 
+# sed -i 's/5.7.21/8.0.23/g' install_mysql.sh 
 bash install_mysql.sh
 
 异机mysqldump备份，需要的程序:
-https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.44-winx64.zip
+https://dev.mysql.com/get/Downloads/MySQL-5.6/mysql-5.6.39-winx64.zip
 https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.21-winx64.zip
-https://dev.mysql.com/get/Downloads/MySQL-5.7/mysql-5.7.29-winx64.zip
+https://dev.mysql.com/get/Downloads/MySQL-8.0/mysql-8.0.23-winx64.zip
 Download
 
 
 
 # 依赖包 
-yum install -y git wget rdate unzip net-tools deltarpm vim tree lrzsz telnet traceroute
-
-
+yum install -y git wget curl rdate ntpdate unzip net-tools deltarpm vim tree lrzsz telnet traceroute
 
 clear
     count=`ps -ef |grep mysqld |grep -v "grep" |wc -l`
@@ -63,10 +59,11 @@ clear
 
 # clear
 soft_path="/soft" # mysql制品的存放路径
-data_path="/db/data" # mysql的安装路径
-backup_path="/dbbak" # mysqldump的安装路径
-mysql_version="mysql-5.7.32-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
-pt_version="percona-toolkit-3.2.1" # Linux - Generic 压缩包
+data_path="/data" # mysql的安装路径
+backup_path="/data" # mysqldump的安装路径
+mysql_version="mysql-8.0.23-linux-glibc2.12-x86_64" # Linux - Generic 压缩包
+pt_version="percona-toolkit-3.3.0" # Linux - Generic 压缩包
+nmon_version="nmon_x86_64_centos7"
 mysql_password="heading"
 
 local_ip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
@@ -78,9 +75,9 @@ echo -e "\n\e[1;33m 物理内存的70%约为:${mem7}G，请替换 my.cnf 配置�
 
 echo -e "\n\e[1;33m 提前装好操作系统、配置好外网、准备好安装文件，一键安装脚本在虚拟机环境（1CPU,2G内存），整体耗时大约10分钟。 \e[0m"
 echo -e "\n\e[1;33m mysql安装文件,请放在 ${soft_path} 下! \e[0m"
-echo " ${mysql_version}.tar.gz"
+echo " ${mysql_version}.tar.*z"
 echo " ${pt_version}_x86_64.tar.gz"
-# echo " ${nmon_version}"
+echo " ${nmon_version}"
 # 链接: https://pan.baidu.com/s/1PsR1z9kk3Gu_1j-IWtg82w 密码: qre4
 
 echo -e "\n\e[1;33m mysql程序,安装在 ${data_path} 下,如有不同,请退出并手动修改脚本! \e[0m"
@@ -100,10 +97,10 @@ echo -e "\n\e[1;33m Continue? (y/n [n]): \e[0m"
 # 判断安装文件是否存在
 file_exists()
 {
-ls ${soft_path}/${mysql_version}.tar.gz > /dev/null 2>&1
-if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查文件:${mysql_version}.tar.gz ... OK! \e[0m"
+ls ${soft_path}/${mysql_version}.tar.*z > /dev/null 2>&1
+if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查文件:${mysql_version}.tar.*z ... OK! \e[0m"
     else
-        echo -e "\n\e[1;31m 检查文件:${mysql_version}.tar.gz ... 没找到! \e[0m"
+        echo -e "\n\e[1;31m 检查文件:${mysql_version}.tar.*z ... 没找到! \e[0m"
         exit
 fi
 
@@ -114,12 +111,12 @@ if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查文件:${pt_version}_x86_64.tar.g
         exit
 fi
 
-# ls ${soft_path}/${nmon_version} > /dev/null 2>&1
-# if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查文件:${nmon_version} ... OK! \e[0m"
-#     else
-#         echo -e "\n\e[1;31m 检查文件:${nmon_version} ... 没找到! \e[0m"
-#         exit
-# fi
+ls ${soft_path}/${nmon_version} > /dev/null 2>&1
+if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查文件:${nmon_version} ... OK! \e[0m"
+    else
+        echo -e "\n\e[1;31m 检查文件:${nmon_version} ... 没找到! \e[0m"
+        exit
+fi
 }
 
 
@@ -221,7 +218,7 @@ else
     wget -O /etc/yum.repos.d/epel-6.repo   http://mirrors.aliyun.com/repo/epel-6.repo    >> $log 2>&1
     yum clean all  >> $log 2>&1
     yum makecache  >> $log 2>&1
-    yum install -y atop htop glances iftop vmtouch gcc tigervnc-server xterm xclock libaio libaio-devel sysstat xhost tree iotop dstat iptraf iptraf-ng  >> $log 2>&1
+    yum install -y atop htop glances iftop vmtouch gcc  xterm xclock libaio libaio-devel sysstat xhost tree iotop dstat iptraf iptraf-ng  >> $log 2>&1
     yum install -y make sysstat libaio libaio-devel  >> $log 2>&1
     yum install -y libaio autoconf  >> $log 2>&1
     # yum install -y libXi libXtst make sysstat cpp mpfr binutils compat-libcap1 compat-libstdc++-33 elfutils-libelf elfutils-libelf-devel gcc gcc-c++ glibc glibc-common glibc-devel glibc-headers libaio libaio-devel libgcc libstdc++ libstdc++-devel compat-db compat-libstdc++ gnome-libs pdksh xscreensaver openmotif libXp compat-gcc-34 compat-gcc-34-c++ expat unixODBC unixODBC-devel kernel-headers libgomp psmisc  >> $log 2>&1
@@ -244,7 +241,7 @@ else
     wget -O /etc/yum.repos.d/epel-7.repo   http://mirrors.aliyun.com/repo/epel-7.repo    >> $log 2>&1
     yum clean all  >> $log 2>&1
     yum makecache  >> $log 2>&1
-    yum install -y atop htop glances iftop vmtouch gcc tigervnc-server xterm xclock libaio libaio-devel sysstat xhost tree iotop dstat iptraf iptraf-ng  >> $log 2>&1
+    yum install -y atop htop glances iftop vmtouch gcc xterm xclock libaio libaio-devel sysstat xhost tree iotop dstat iptraf iptraf-ng  >> $log 2>&1
     yum install -y make sysstat libaio libaio-devel  >> $log 2>&1
     yum install -y libaio autoconf  >> $log 2>&1
     # 5.7.31  
@@ -412,9 +409,6 @@ sysctl
 # pam_limits
 # selinux
 iptables
-
-
-
 useradd
 # profile
 oraInventory
@@ -441,7 +435,7 @@ if [ $? -eq 0 ];then echo -e "\n\e[1;36m 解压安装文件:${mysql_version} ...
     else
 echo -e "\n\e[1;36m 解压安装文件:${mysql_version} ... 开始解压! \e[0m"
 
-tar zxvf ${soft_path}/${mysql_version}.tar.gz -C ${data_path} >> $log
+tar xvf ${soft_path}/${mysql_version}.tar.*z -C ${data_path} >> $log
 
 echo -e "\n\e[1;31m 解压安装文件:${mysql_version} ... 解压完成! \e[0m"
 fi
@@ -552,9 +546,10 @@ if [ $? -eq 0 ];then
     scripts/mysql_install_db --user=mysql >> $log 2>&1
 fi
 
-echo ${mysql_version}|grep 5.7
+#echo ${mysql_version}|grep 5.7
+echo ${mysql_version}|grep -E '5.7|8.0'
 if [ $? -eq 0 ];then
-    echo -e "\n    初始化5.7数据库:"${mysql_version} >> $log 2>&1
+    echo -e "\n    初始化5.7|8.0数据库:"${mysql_version} >> $log 2>&1
     mkdir mysql-files
     chown mysql:mysql mysql-files
     chmod 750 mysql-files
@@ -562,6 +557,13 @@ if [ $? -eq 0 ];then
     echo '[mysqld]'                                 > /etc/my.cnf.d/my001-log.cnf
     echo 'log_timestamps                 = SYSTEM' >> /etc/my.cnf.d/my001-log.cnf
     
+    echo ${mysql_version}|grep 8.0
+    if [ $? -eq 0 ];then
+        sed -i "s/^.*sql-mode.*$/sql-mode=/" my.cnf
+        sed -i "s/^.*query-cache-type.*$//" my.cnf
+        sed -i "s/^.*query-cache-size.*$//" my.cnf
+    fi
+
     echo -e "\n    bin/mysqld --defaults-file=./my.cnf --initialize-insecure --user=mysql 开始执行............................................................" >> $log 2>&1
     bin/mysqld --defaults-file=./my.cnf --initialize-insecure --user=mysql >> $log 2>&1
     echo -e "\n    bin/mysql_ssl_rsa_setup --defaults-file=./my.cnf 开始执行............................................................" >> $log 2>&1
@@ -667,7 +669,13 @@ newstr="datadir=${data_path}/mysql/data"
 sed -i "47s#$oldstr#$newstr#g" /etc/init.d/mysql.server
 
 cat /etc/init.d/mysql.server|grep -in basedir=  >> $log 2>&1
+echo '--------------------' >> $log 2>&1
 cat /etc/init.d/mysql.server|grep -in datadir=  >> $log 2>&1
+
+systemctl daemon-reload &&
+systemctl stop mysql.server &&
+systemctl start mysql.server &&
+systemctl status mysql.server
 
 echo -e "\n\e[1;31m 检查:配置mysql实例自动启动 ... 已完成! \e[0m"
 fi
@@ -688,11 +696,8 @@ date
 
 PATH=\$PATH:${data_path}/mysql/bin
 export PATH
-
 cd ${backup_path}/backup/
-
 time mysqldump -S${data_path}/mysql/data/mysql.sock --port=3306 -uroot -p${mysql_password} --opt --single-transaction --flush-logs --master-data=2 --all-databases --triggers --routines --events | gzip > \$rq-mysqldump.sql.gz 
-
 # bash显示前几天,并删除
 rqt=\`date -d "7 days ago" +%Y%m%d\`
 echo \$rqt
