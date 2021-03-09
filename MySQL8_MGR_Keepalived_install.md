@@ -66,7 +66,7 @@ dba.checkInstanceConfiguration('root:heading@172.17.10.84:3306')
 dba.checkInstanceConfiguration('root:heading@172.17.10.85:3306')  
 dba.checkInstanceConfiguration('root:heading@172.17.10.86:3306')  
 
-备用检查命令
+备用检查命令  
 cluster.checkInstanceState('root:heading@172.17.10.84:3306')  
 cluster.checkInstanceState('root:heading@172.17.10.85:3306')  
 cluster.checkInstanceState('root:heading@172.17.10.86:3306')  
