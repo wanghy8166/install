@@ -1,15 +1,15 @@
 # MySQL8 + MGR + Keepalived 三节点部署
 
 ## 官方架构图
-https://dev.mysql.com/doc/refman/8.0/en/mysql-innodb-cluster-introduction.html
-https://dev.mysql.com/doc/refman/8.0/en/group-replication-plugin-architecture.html
-https://dev.mysql.com/doc/mysql-router/8.0/en/mysql-router-general-using-deploying.html
+https://dev.mysql.com/doc/refman/8.0/en/mysql-innodb-cluster-introduction.html  
+https://dev.mysql.com/doc/refman/8.0/en/group-replication-plugin-architecture.html  
+https://dev.mysql.com/doc/mysql-router/8.0/en/mysql-router-general-using-deploying.html  
 
 ## 用到的软件
-https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.23-linux-glibc2.12-x86_64.tar.xz
-https://cdn.mysql.com/Downloads/MySQL-Shell/mysql-shell-8.0.23-linux-glibc2.12-x86-64bit.tar.gz
-https://downloads.percona.com/downloads/percona-toolkit/3.3.0/binary/tarball/percona-toolkit-3.3.0_x86_64.tar.gz
-https://raw.githubusercontent.com/wanghy8166/nmon/master/nmon_x86_64_centos7
+https://cdn.mysql.com/Downloads/MySQL-8.0/mysql-8.0.23-linux-glibc2.12-x86_64.tar.xz  
+https://cdn.mysql.com/Downloads/MySQL-Shell/mysql-shell-8.0.23-linux-glibc2.12-x86-64bit.tar.gz  
+https://downloads.percona.com/downloads/percona-toolkit/3.3.0/binary/tarball/percona-toolkit-3.3.0_x86_64.tar.gz  
+https://raw.githubusercontent.com/wanghy8166/nmon/master/nmon_x86_64_centos7  
 根据mgr+Keepalived测试预研，不使用router即可满足要求，又可少用一个组件，所以不用router。  
 3个节点，每个节点都要安装这些软件和配置，特别说明的按实际来。  
 
@@ -33,11 +33,11 @@ cat /etc/hosts
 mkdir /soft  
 
 本例中，数据文件放在该路径  
-mkdir /data
+mkdir /data  
 
 ### 安装mysql
 官方安装文档介绍 https://dev.mysql.com/doc/refman/8.0/en/binary-installation.html  
-一键安装脚本:[install_mysql.sh](install_mysql.sh)
+一键安装脚本:[install_mysql.sh](install_mysql.sh)  
 
 ### 安装mysql-shell
 ```
@@ -52,9 +52,9 @@ echo export PATH=/data/mysql-shell/bin:\$PATH >>/root/.bash_profile
 之前阅读过的文档 https://jeremyxu2010.github.io/2019/05/mysql-innodb-cluster%E5%AE%9E%E6%88%98/  
 
 #### 配置本地实例，每个实例都执行
-mysqlsh --uri root:heading@172.17.10.84:3306
-mysqlsh --uri root:heading@172.17.10.85:3306
-mysqlsh --uri root:heading@172.17.10.86:3306
+mysqlsh --uri root:heading@172.17.10.84:3306  
+mysqlsh --uri root:heading@172.17.10.85:3306  
+mysqlsh --uri root:heading@172.17.10.86:3306  
 ```
 \status
 \sql
@@ -62,17 +62,17 @@ GRANT BACKUP_ADMIN, CLONE_ADMIN, PERSIST_RO_VARIABLES_ADMIN, REPLICATION_APPLIER
 \js
 dba.configureLocalInstance()
 ```
-dba.checkInstanceConfiguration('root:heading@172.17.10.84:3306')
-dba.checkInstanceConfiguration('root:heading@172.17.10.85:3306')
-dba.checkInstanceConfiguration('root:heading@172.17.10.86:3306')
+dba.checkInstanceConfiguration('root:heading@172.17.10.84:3306')  
+dba.checkInstanceConfiguration('root:heading@172.17.10.85:3306')  
+dba.checkInstanceConfiguration('root:heading@172.17.10.86:3306')  
 
 备用检查命令
-cluster.checkInstanceState('root:heading@172.17.10.84:3306')
-cluster.checkInstanceState('root:heading@172.17.10.85:3306')
-cluster.checkInstanceState('root:heading@172.17.10.86:3306')
+cluster.checkInstanceState('root:heading@172.17.10.84:3306')  
+cluster.checkInstanceState('root:heading@172.17.10.85:3306')  
+cluster.checkInstanceState('root:heading@172.17.10.86:3306')  
 
 #### 修改3个实例的权限
-chown mysql:mysql -R /data/mysql/lib
+chown mysql:mysql -R /data/mysql/lib  
 
 #### 创建cluster，在其中一个实例操作，默认会成为当前主实例
 ```
@@ -128,11 +128,11 @@ SHOW PROCESSLIST; # 有global mutex全局互斥锁
 ```
 ================================================================================
 ### MGR单主模式，如何使客户端连接到读写实例呢？
-答:使用keepalived直接绑定vip到读写实例上去实现。
+答:使用keepalived直接绑定vip到读写实例上去实现。  
 
-单主MGR会保证只有PRIMARY节点可写,SECONDARY节点是只读,所以只需要绑定vip到PRIMARY节点即可。
-假设出现脑裂，vip在多个节点同时出现，因为只有PRIMARY节点可写，所以也不会影响一致性。
-控制点:
+单主MGR会保证只有PRIMARY节点可写,SECONDARY节点是只读,所以只需要绑定vip到PRIMARY节点即可。  
+假设出现脑裂，vip在多个节点同时出现，因为只有PRIMARY节点可写，所以也不会影响一致性。  
+控制点:  
 ```
 SHOW GLOBAL VARIABLES LIKE '%read_only%';
 | read_only             | ON    |
@@ -141,7 +141,7 @@ SHOW GLOBAL VARIABLES LIKE '%read_only%';
 
 
 ### Keepalived部署
-配置keepalived，需要修改vip地址、网卡接口名如eth0、mysql的root密码，3个节点配置一致。
+配置keepalived，需要修改vip地址、网卡接口名如eth0、mysql的root密码，3个节点配置一致。  
 
 #### 防火墙配置
 ```
@@ -199,7 +199,7 @@ systemctl restart keepalived
 ```
 ================================================================================
 ### 选举新的主实例，有2种方法
-https://www.percona.com/blog/2021/01/11/mysql-group-replication-how-to-elect-the-new-primary-node/
+https://www.percona.com/blog/2021/01/11/mysql-group-replication-how-to-elect-the-new-primary-node/  
 
 (1). 提高权重
 在SECONDARY提高权重
@@ -243,12 +243,12 @@ ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'heading';
 FLUSH PRIVILEGES;
 ```
 #### 问题2:
-测试时，使用sysbench过度施加压力，强行断电重启主节点，重启后报错
-2021-03-03T21:53:16.722538+08:00 0 [ERROR] [MY-011735] [Repl] Plugin group_replication reported: '[GCS] The member was unable to join the group. Local port: 33061'
-2021-03-03T21:53:19.116454+08:00 42 [ERROR] [MY-011640] [Repl] Plugin group_replication reported: 'Timeout on wait for view after joining group'
-2021-03-03T21:53:19.116544+08:00 42 [ERROR] [MY-011735] [Repl] Plugin group_replication reported: '[GCS] The member is leaving a group without being on one.'
-每个节点都只能查到自己，且是OFFLINE状态
-处理:
+测试时，使用sysbench过度施加压力，强行断电重启主节点，重启后报错  
+2021-03-03T21:53:16.722538+08:00 0 [ERROR] [MY-011735] [Repl] Plugin group_replication reported: '[GCS] The member was unable to join the group. Local port: 33061'  
+2021-03-03T21:53:19.116454+08:00 42 [ERROR] [MY-011640] [Repl] Plugin group_replication reported: 'Timeout on wait for view after joining group'  
+2021-03-03T21:53:19.116544+08:00 42 [ERROR] [MY-011735] [Repl] Plugin group_replication reported: '[GCS] The member is leaving a group without being on one.'  
+每个节点都只能查到自己，且是OFFLINE状态  
+处理:  
 ```
 如何知道当前节点重启前是否是主节点？
 分别查询各节点日志，看最后谁是主节点。
@@ -275,9 +275,9 @@ start group_replication;
 
 
 #### 问题3：
-2021-03-04T12:55:28.651183+08:00 630 [Warning] [MY-010956] [Server] Invalid replication timestamps: original commit timestamp is more recent than the immediate commit timestamp. This may be an issue if delayed replication is active. Make sure that servers have their clocks set to the correct time. No further message will be emitted until after timestamps become valid again.
-2021-03-04T12:55:28.664609+08:00 630 [Warning] [MY-010957] [Server] The replication timestamps have returned to normal values.
-处理：
+2021-03-04T12:55:28.651183+08:00 630 [Warning] [MY-010956] [Server] Invalid replication timestamps: original commit timestamp is more recent than the immediate commit timestamp. This may be an issue if delayed replication is active. Make sure that servers have their clocks set to the correct time. No further message will be emitted until after timestamps become valid again.  
+2021-03-04T12:55:28.664609+08:00 630 [Warning] [MY-010957] [Server] The replication timestamps have returned to normal values.  
+处理：  
 ```
 (1)忽略警告
 (2)配置不让出现
@@ -285,5 +285,5 @@ set global log_error_suppression_list='MY-010956,MY-010957';
 show variables like 'log_error%';
 ```
 #### 问题4：
-mysql-shell学习参考
-https://www.percona.com/blog/2021/02/25/mysql-monitoring-and-reporting-using-the-mysql-shell/
+mysql-shell学习参考  
+https://www.percona.com/blog/2021/02/25/mysql-monitoring-and-reporting-using-the-mysql-shell/  
