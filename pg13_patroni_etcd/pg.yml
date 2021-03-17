@@ -1,0 +1,115 @@
+scope: pg-cluster
+namespace: /service/
+# 修改name,各节点不一样 
+name: pg1
+
+log:
+  dir: /data/patroni/logs
+
+restapi:
+  listen: 0.0.0.0:8008
+  # 修改connect_address,各节点不一样 
+  connect_address: 172.17.10.84:8008
+
+etcd:
+  hosts:
+    - 172.17.10.84:2379
+    - 172.17.10.85:2379
+    - 172.17.10.86:2379
+
+bootstrap:
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+    maximum_lag_on_failover: 1048576
+    master_start_timeout: 300
+    synchronous_mode: false
+    postgresql:
+      use_pg_rewind: true
+      use_slots: true
+      parameters:
+        listen_addresses: "0.0.0.0"
+        port: 5432
+        wal_level: logical
+        hot_standby: "on"
+        # 13已废弃 wal_keep_segments: 100
+        max_wal_senders: 10
+        max_replication_slots: 10
+        wal_log_hints: "on"
+
+        # 最大连接数
+        max_connections: 2000
+        # shared_buffers改为1/4主机内存
+        shared_buffers: 2048MB
+        # sql查询时使用的内存空间,默认4MB
+        work_mem: 8MB
+        # 创建索引时使用的内存空间,默认64MB
+        maintenance_work_mem: 256MB
+        log_filename: 'postgresql-%Y-%m-%d.log'
+        # 开启归档
+        archive_mode: on
+        archive_command: 'cp %p /data/pgarchive/%f'
+        max_wal_size: 4GB
+        # 防止远程程序与PG连接中断
+        tcp_keepalives_idle: 60
+        tcp_keepalives_interval: 10
+        tcp_keepalives_count: 10
+        # https://github.com/darold/pgbadger#INSTALLATION
+        # 单位:milliseconds毫秒
+        log_min_duration_statement: 1000
+        log_line_prefix: '%m [%p]: user=%u,db=%d,app=%a,client=%h '
+        log_checkpoints: on
+        log_connections: on
+        log_disconnections: on
+        log_lock_waits: on
+        # 跟踪临时文件使用,设置跟踪阈值为0KB
+        log_temp_files: 0
+        # 回收垃圾相关
+        log_autovacuum_min_duration: 0
+        log_error_verbosity: default
+        lc_messages: 'C'
+        wal_keep_size: 4096MB
+
+  initdb:
+  - encoding: UTF8
+  - locale: C
+  - data-checksums
+
+  pg_hba:
+  - host replication replication 0.0.0.0/0 md5
+  - host all all 0.0.0.0/0 md5
+
+postgresql:
+  listen: 0.0.0.0:5432
+  # 修改connect_address,各节点不一样 
+  connect_address: 172.17.10.84:5432
+  data_dir: /data/pgdata
+  bin_dir: /usr/pgsql-13/bin
+
+  authentication:
+    replication:
+      username: replication
+      password: "passw0rd"
+    superuser:
+      username: postgres
+      password: "passw0rd"
+    rewind:
+      username: rewind_user
+      password: "passw0rd"
+
+  basebackup:
+    max-rate: 100M
+    checkpoint: fast
+
+  callbacks:
+    on_start: /bin/bash /data/patroni/loadvip.sh
+    on_stop: /bin/bash /data/patroni/loadvip.sh
+    on_restart: /bin/bash /data/patroni/loadvip.sh
+    on_role_change: /bin/bash /data/patroni/loadvip.sh
+    
+tags:
+    nofailover: false
+    noloadbalance: false
+    clonefrom: false
+    nosync: false
