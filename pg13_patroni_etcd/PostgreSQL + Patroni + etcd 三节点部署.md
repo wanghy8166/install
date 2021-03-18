@@ -327,10 +327,9 @@ postgres=# show tcp_keepalives_idle ;
 
 通过查看以上日志和配置文件，在任一节点操作patronictl，3个节点都自动完成了修改并生效。  
 之后，记得将参数还原  
-```
-patronictl -c pg.yml edit-config -p 'tcp_keepalives_idle=60'  
-```
-但是，我这里测试，发现改1次成功，改第2次就都不动了，有待继续研究。  
+`patronictl -c pg.yml edit-config -p 'tcp_keepalives_idle=60'`  
+~~但是，我最开始在这里测试，发现改1次成功，改第2次就都不动了，有待继续研究。~~
+后来，发现命令行这里，不要输入多余的空格，就每次都成功，非常顺利。    
 
 
 
