@@ -69,9 +69,9 @@ mysql_password="heading"
 local_ip=`/sbin/ifconfig -a|grep inet|grep -v 127.0.0.1|grep -v inet6|awk '{print $2}'|tr -d "addr:"`
 echo "本机ip:"${local_ip}
 
-mem=`awk '($1 == "MemTotal:"){print $2/1048576*0.7}' /proc/meminfo`
+mem=`awk '($1 == "MemTotal:"){print $2/1048576*0.6}' /proc/meminfo`
 mem7=${mem%.*}
-echo -e "\n\e[1;33m 物理内存的70%约为:${mem7}G，请替换 my.cnf 配置参数（innodb-log-file-size，innodb-buffer-pool-size）! \e[0m"
+echo -e "\n\e[1;33m 物理内存的60%约为:${mem7}G，请替换 my.cnf 配置参数（innodb-log-file-size，innodb-buffer-pool-size）! \e[0m"
 
 echo -e "\n\e[1;33m 提前装好操作系统、配置好外网、准备好安装文件，一键安装脚本在虚拟机环境（1CPU,2G内存），整体耗时大约10分钟。 \e[0m"
 echo -e "\n\e[1;33m mysql安装文件,请放在 ${soft_path} 下! \e[0m"
@@ -514,7 +514,7 @@ innodb-log-files-in-group      = 8
 innodb-log-file-size           = 128M
 innodb-flush-log-at-trx-commit = 1
 innodb-file-per-table          = 1
-# innodb-buffer-pool-size 改为物理内存的70%
+# innodb-buffer-pool-size 改为物理内存的70%;因目前小内存较多,改为60%;
 innodb-buffer-pool-size        = ${mem7}G
 
 # LOGGING #
