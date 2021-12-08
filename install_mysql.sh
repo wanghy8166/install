@@ -485,6 +485,7 @@ innodb                         = FORCE
 symbolic-links                 = 0
 interactive_timeout            = 360
 wait_timeout                   = 360
+secure_file_priv               = ''
 
 # DATA STORAGE #
 datadir                        = ${data_path}/mysql/data/
