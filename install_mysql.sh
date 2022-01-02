@@ -517,6 +517,7 @@ innodb-flush-log-at-trx-commit = 1
 innodb-file-per-table          = 1
 # innodb-buffer-pool-size 改为物理内存的70%;因目前小内存较多,改为60%;
 innodb-buffer-pool-size        = ${mem7}G
+innodb_temp_data_file_path     = ibtmp1:12M:autoextend:max:10G
 
 # LOGGING #
 log-error                      = ${data_path}/mysql/data/mysql-error.log
