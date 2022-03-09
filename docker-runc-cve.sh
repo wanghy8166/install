@@ -27,6 +27,9 @@ sudo yum makecache
 sudo yum list docker-ce --showduplicates | sort -r
 sudo yum install docker-ce
 
+sudo systemctl start docker
+sudo systemctl enable docker
+
 # 升级成功后,docker-runc,docker-containerd,docker-containerd-ctr,docker-containerd-shim,这4个命令都被替换了。
 echo >>$log
 docker -v >>$log
