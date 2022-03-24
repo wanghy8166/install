@@ -76,7 +76,8 @@ rpl-semi-sync-master-enabled   = 1
 rpl-semi-sync-slave-enabled    = 1
 # 5.7.5 Multi-threaded Slave 多线程复制
 slave-parallel-type            = LOGICAL_CLOCK
-slave-parallel-workers         = 16
+# slave-parallel-workers         = 16
+slave-parallel-workers         = 0
 slave_preserve_commit_order    = 1
 EOF
 service mysql.server restart
