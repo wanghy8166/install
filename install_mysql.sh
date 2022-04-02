@@ -486,6 +486,7 @@ symbolic-links                 = 0
 interactive_timeout            = 360
 wait_timeout                   = 360
 secure_file_priv               = ''
+event_scheduler                = ON
 
 # DATA STORAGE #
 datadir                        = ${data_path}/mysql/data/
