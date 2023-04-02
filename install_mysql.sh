@@ -137,12 +137,12 @@ isroot()
 # 判断swap是否16G
 swap()
 {
-	swap=`free -m|grep -i swap|awk '{print $2}'`
-	if [ $swap -lt 16000 ];then
+    swap=`free -m|grep -i swap|awk '{print $2}'`
+    if [ $swap -lt 16000 ];then
         echo -e "\n\e[1;31m 检查:swap ... 小于16G,请修改! \e[0m"
         exit
     else 
-    	echo -e "\n\e[1;36m 检查:swap ... OK! \e[0m"
+        echo -e "\n\e[1;36m 检查:swap ... OK! \e[0m"
     fi
 }
 
@@ -153,13 +153,13 @@ check_internet()
 {
 ping -c 4 www.baidu.com > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	echo -e "\n\e[1;36m 检查:上公网 ... OK! \e[0m"
+    echo -e "\n\e[1;36m 检查:上公网 ... OK! \e[0m"
 else
     echo -e "\n\e[1;31m 检查:上公网 ... 很遗憾!您不能上公网,请修改IP地址、网关、DNS配置! \e[0m"
     echo -e "\n\e[1;31m 检查:cat /etc/sysconfig/network-scripts/ifcfg- \e[0m"
     echo -e "\n\e[1;31m 检查:cat /etc/resolv.conf \e[0m"
     echo -e "\n\e[1;31m 检查:service iptables status \e[0m"
-	exit
+    exit
 fi
 }
 
@@ -170,7 +170,7 @@ change_date()
 {
 diff /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 if [ $? -eq 0 ];then
-	echo -e "\n\e[1;36m 检查:时区为上海 ... OK! \e[0m"
+    echo -e "\n\e[1;36m 检查:时区为上海 ... OK! \e[0m"
 else 
     mv /etc/localtime /etc/localtime-`date +%Y%m%d-%H%M%S`
     cp -i /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
@@ -180,9 +180,9 @@ fi
 touch /var/spool/cron/root
 grep -q "rdate" /var/spool/cron/root
 if [ $? -eq 0 ];then
-	echo -e "\n\e[1;36m 检查:时间同步已加入crontab ... OK! \e[0m"
+    echo -e "\n\e[1;36m 检查:时间同步已加入crontab ... OK! \e[0m"
 else
-	cp -i /var/spool/cron/root /var/spool/cron/root-`date +%Y%m%d-%H%M%S`
+    cp -i /var/spool/cron/root /var/spool/cron/root-`date +%Y%m%d-%H%M%S`
     echo "08 23 * * * /usr/bin/rdate -s time.nist.gov && /sbin/hwclock --systohc" >> /var/spool/cron/root
     echo -e "\n\e[1;31m 检查:时间同步 ... 配置已加入crontab! \e[0m"
 fi
@@ -280,8 +280,8 @@ sysctl()
 {
 grep -q "swappiness" /etc/sysctl.conf
 if [ $? -eq 0 ];then
-	echo -e "\n\e[1;36m 检查:设置内核参数 ... OK! \e[0m"
-	return
+    echo -e "\n\e[1;36m 检查:设置内核参数 ... OK! \e[0m"
+    return
 else
 cp -i /etc/sysctl.conf /etc/sysctl.conf-`date +%Y%m%d-%H%M%S`
 
@@ -351,8 +351,8 @@ useradd()
 {
 id mysql > /dev/null 2>&1
 if [ $? -eq 0 ];then
-	echo -e "\n\e[1;36m 检查:添加组和mysql用户 ... OK! \e[0m"
-	return
+    echo -e "\n\e[1;36m 检查:添加组和mysql用户 ... OK! \e[0m"
+    return
 else
     /usr/sbin/groupadd mysql
     /usr/sbin/useradd -r -g mysql -s /bin/false mysql
@@ -379,8 +379,8 @@ bash_profile()
 {
 grep -q "mysql" /root/.bash_profile
 if [ $? -eq 0 ];then
-	echo -e "\n\e[1;36m 检查:用户环境配置 ... OK! \e[0m"
-	return
+    echo -e "\n\e[1;36m 检查:用户环境配置 ... OK! \e[0m"
+    return
 else
 cp -i /root/.bash_profile /root/.bash_profile-`date +%Y%m%d-%H%M%S` 
 cat >>/root/.bash_profile<<EOF
@@ -763,11 +763,11 @@ fi
 
 
 # 配置mysql-log-rotate
-ls /etc/logrotate.d/mysql-log-rotate > /dev/null 2>&1
+ls ${data_path}/mysql/mysql-log-rotate > /dev/null 2>&1
 if [ $? -eq 0 ];then echo -e "\n\e[1;36m 检查:配置mysql-log-rotate ... 已存在! \e[0m"
     else
 
-cat >/etc/logrotate.d/mysql-log-rotate<<EOF
+cat >${data_path}/mysql/mysql-log-rotate<<EOF
 ${data_path}/mysql/data/mysql-slow.log {
         nocompress
         create 600 mysql mysql
@@ -787,7 +787,7 @@ ${data_path}/mysql/data/mysql-slow.log {
     endscript
 }
 EOF
-echo "59 23 * * * /usr/sbin/logrotate -f /etc/logrotate.d/mysql-log-rotate" >> /var/spool/cron/root
+echo "59 23 * * * /usr/sbin/logrotate -f ${data_path}/mysql/mysql-log-rotate" >> /var/spool/cron/root
 
 echo -e "\n\e[1;31m 检查:配置mysql-log-rotate ... 已完成! \e[0m"
 fi
